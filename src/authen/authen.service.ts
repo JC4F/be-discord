@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ConflictException } from '@nestjs/common';
 import { Request } from 'express';
 import { User, UserDocument } from './schemas/user.schema';
 import { Model } from 'mongoose';
@@ -15,6 +15,19 @@ export class AuthenService {
   ) {}
 
   async registerUser(req: Request, user: IRegisterUser): Promise<any> {
+    // check unique username
+    const userExist = await this.userModel
+      .findOne({ $or: [{ username: user.username }, { email: user.email }] })
+      .lean();
+
+    if (userExist && userExist.username === user.username) {
+      throw new ConflictException('Username already exists!');
+      return;
+    } else if (userExist && userExist.email === user.email) {
+      throw new ConflictException('Email already exists!');
+      return;
+    }
+
     const newUser = new this.userModel({
       email: user.email,
       username: user.username,
