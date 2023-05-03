@@ -2,8 +2,9 @@ import { Controller, Post, Body, UseGuards, Get, Req } from '@nestjs/common';
 import { Request } from 'express';
 import { AuthenService } from './authen.service';
 import { IRegisterUser } from './dto/register-user.dto';
-import { LocalAuthGuard } from './local/local-auth.guard';
-import { JwtAuthGuard } from './jwt/jwt-auth.guard';
+import { LocalAuthGuard } from './strategy/local/local-auth.guard';
+import { JwtAuthGuard } from './strategy/jwt/jwt-auth.guard';
+import { UserDocument } from './schemas/user.schema';
 
 @Controller('authen')
 export class AuthenController {
@@ -19,13 +20,13 @@ export class AuthenController {
 
   @UseGuards(LocalAuthGuard)
   @Post('/login')
-  async registerNewUsera(@Req() req) {
-    return this.authenService.login(req.user);
+  async registerNewUsera(@Req() req: Request) {
+    return this.authenService.login(req.user as UserDocument);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  getProfile(@Req() req) {
+  getProfile(@Req() req: Request) {
     return req.user;
   }
 }
