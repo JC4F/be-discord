@@ -8,6 +8,7 @@ import { User, UserSchema } from './schemas/user.schema';
 import { LocalStrategy } from './strategy/local/local.strategy';
 import { JwtStrategy } from './strategy/jwt/jwt.strategy';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { GoogleStrategy } from './strategy/google/google.strategy';
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     }),
   ],
   controllers: [AuthenController],
-  providers: [AuthenService, LocalStrategy, JwtStrategy],
+  providers: [AuthenService, LocalStrategy, JwtStrategy, GoogleStrategy],
   exports: [AuthenService],
 })
 export class AuthenModule {}

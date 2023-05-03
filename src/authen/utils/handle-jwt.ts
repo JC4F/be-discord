@@ -9,7 +9,7 @@ export interface IProcessPayLoad {
 // khong can expireIn => gui len server thi de cho jwt strategy authen duoc
 export interface IAuthenResponse {
   userId: string;
-  username: string;
+  username: string | null;
   email: string;
   isVerified: boolean;
   accessToken: string;
@@ -28,7 +28,7 @@ export const processPayloadForJwtAndResponse = (
 
   return {
     userId: payload._id.toString(),
-    username: payload.username,
+    username: payload.username ?? null,
     email: payload.email,
     isVerified: payload.isVerified,
     accessToken,

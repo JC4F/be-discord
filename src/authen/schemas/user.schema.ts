@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 
-enum LoginType {
+export enum LoginType {
   NORMAL = 'NORMAL',
   GOOGLE = 'GOOGLE',
   FACEBOOK = 'FACEBOOK',

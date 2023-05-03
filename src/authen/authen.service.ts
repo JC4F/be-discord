@@ -1,11 +1,16 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Request } from 'express';
-import { User, UserDocument } from './schemas/user.schema';
+import { LoginType, User, UserDocument } from './schemas/user.schema';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { IRegisterUser } from './dto/register-user.dto';
 import { JwtService } from '@nestjs/jwt';
 import { processPayloadForJwtAndResponse } from './utils';
+import { IUserFromEmailStrategy } from './strategy/google/google.strategy';
 
 @Injectable()
 export class AuthenService {
@@ -47,7 +52,28 @@ export class AuthenService {
     return null;
   }
 
-  async login(user: UserDocument) {
+  login(user: UserDocument) {
     return processPayloadForJwtAndResponse(user, this.jwtService);
+  }
+
+  async googleLogin(user: IUserFromEmailStrategy) {
+    if (!user) {
+      throw new UnauthorizedException('Something wrong with google login!');
+      return;
+    }
+
+    const existUser = await this.userModel.findOne({ email: user.email });
+
+    if (!existUser) {
+      const newUser = new this.userModel({
+        email: user.email,
+        loginType: LoginType.GOOGLE,
+      });
+
+      const resultUser: UserDocument = await newUser.save();
+      return processPayloadForJwtAndResponse(resultUser, this.jwtService);
+    }
+
+    return processPayloadForJwtAndResponse(existUser, this.jwtService);
   }
 }
