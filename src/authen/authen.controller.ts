@@ -1,11 +1,5 @@
-import {
-  Controller,
-  Post,
-  Body,
-  Request,
-  UseGuards,
-  Get,
-} from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Get, Req } from '@nestjs/common';
+import { Request } from 'express';
 import { AuthenService } from './authen.service';
 import { IRegisterUser } from './dto/register-user.dto';
 import { LocalAuthGuard } from './local/local-auth.guard';
@@ -16,21 +10,22 @@ export class AuthenController {
   constructor(private authenService: AuthenService) {}
 
   @Post('/register')
-  async registerNewUser(@Body() postRegisterUser: IRegisterUser) {
-    await this.authenService.registerUser(postRegisterUser);
-
-    return { accessToken: 'access_token' };
+  async registerNewUser(
+    @Req() req: Request,
+    @Body() postRegisterUser: IRegisterUser,
+  ) {
+    return await this.authenService.registerUser(req, postRegisterUser);
   }
 
   @UseGuards(LocalAuthGuard)
   @Post('/login')
-  async registerNewUsera(@Request() req) {
+  async registerNewUsera(@Req() req) {
     return this.authenService.login(req.user);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  getProfile(@Request() req) {
+  getProfile(@Req() req) {
     return req.user;
   }
 }

@@ -12,7 +12,7 @@ enum RoleType {
   USER = 'USER',
 }
 
-export type CatDocument = HydratedDocument<User>;
+export type UserDocument = HydratedDocument<User>;
 
 @Schema({ collection: 'user' })
 export class User {
