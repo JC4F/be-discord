@@ -1,7 +1,7 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
-import { IProcessPayLoad } from '../../utils';
+import { Request } from 'express';
 
 interface IPayloadExtractFromJwt {
   userId: string;
@@ -15,12 +15,17 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor() {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      ignoreExpiration: false,
+      ignoreExpiration: true,
       secretOrKey: process.env.JWT_SECRET,
+      passReqToCallback: true,
     });
   }
 
-  async validate(payload: IPayloadExtractFromJwt): Promise<IProcessPayLoad> {
-    return { userId: payload.userId, username: payload.username };
+  async validate(req: Request, payload: IPayloadExtractFromJwt): Promise<any> {
+    return {
+      userId: payload.userId,
+      username: payload.username,
+      req: req.cookies ?? 'a',
+    };
   }
 }

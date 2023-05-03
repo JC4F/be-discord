@@ -36,6 +36,9 @@ export class User {
 
   @Prop({ default: false })
   isReceiveEmail: boolean;
+
+  @Prop()
+  refreshToken: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

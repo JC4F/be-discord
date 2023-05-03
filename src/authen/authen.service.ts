@@ -41,7 +41,12 @@ export class AuthenService {
     });
 
     const resultUser: UserDocument = await newUser.save();
-    return processPayloadForJwtAndResponse(resultUser, this.jwtService);
+    return processPayloadForJwtAndResponse(
+      req,
+      this.userModel,
+      resultUser,
+      this.jwtService,
+    );
   }
 
   async validateUser(username: string, pass: string): Promise<any> {
@@ -52,11 +57,17 @@ export class AuthenService {
     return null;
   }
 
-  login(user: UserDocument) {
-    return processPayloadForJwtAndResponse(user, this.jwtService);
+  login(req: Request) {
+    return processPayloadForJwtAndResponse(
+      req,
+      this.userModel,
+      req.user as UserDocument,
+      this.jwtService,
+    );
   }
 
-  async googleLogin(user: IUserFromEmailStrategy) {
+  async googleLogin(req: Request) {
+    const user = req.user as IUserFromEmailStrategy;
     if (!user) {
       throw new UnauthorizedException('Something wrong with google login!');
       return;
@@ -71,9 +82,19 @@ export class AuthenService {
       });
 
       const resultUser: UserDocument = await newUser.save();
-      return processPayloadForJwtAndResponse(resultUser, this.jwtService);
+      return processPayloadForJwtAndResponse(
+        req,
+        this.userModel,
+        resultUser,
+        this.jwtService,
+      );
     }
 
-    return processPayloadForJwtAndResponse(existUser, this.jwtService);
+    return processPayloadForJwtAndResponse(
+      req,
+      this.userModel,
+      existUser,
+      this.jwtService,
+    );
   }
 }

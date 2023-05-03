@@ -4,9 +4,7 @@ import { AuthenService } from './authen.service';
 import { IRegisterUser } from './dto/register-user.dto';
 import { LocalAuthGuard } from './strategy/local/local-auth.guard';
 import { JwtAuthGuard } from './strategy/jwt/jwt-auth.guard';
-import { UserDocument } from './schemas/user.schema';
 import { GoogleOAuthGuard } from './strategy/google/google-auth.guard';
-import { IUserFromEmailStrategy } from './strategy/google/google.strategy';
 
 @Controller('authen')
 export class AuthenController {
@@ -23,7 +21,7 @@ export class AuthenController {
   @UseGuards(LocalAuthGuard)
   @Post('/login')
   async registerNewUsera(@Req() req: Request) {
-    return this.authenService.login(req.user as UserDocument);
+    return this.authenService.login(req);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -39,6 +37,6 @@ export class AuthenController {
   @Get('google-redirect')
   @UseGuards(GoogleOAuthGuard)
   googleAuthRedirect(@Req() req: Request) {
-    return this.authenService.googleLogin(req.user as IUserFromEmailStrategy);
+    return this.authenService.googleLogin(req);
   }
 }
