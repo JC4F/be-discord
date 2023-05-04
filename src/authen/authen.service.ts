@@ -69,7 +69,7 @@ export class AuthenService {
   async googleLogin(req: Request) {
     const user = req.user as IUserFromEmailStrategy;
     if (!user) {
-      throw new UnauthorizedException('Something wrong with google login!');
+      throw new UnauthorizedException('Authen failed!');
       return;
     }
 
@@ -98,16 +98,16 @@ export class AuthenService {
     );
   }
 
-  async getUserInfoFromRfTk(req: Request) {
+  async getUserDataFromRfTk(req: Request) {
     const rfTk = JSON.parse(req.cookies['refreshToken']) as string;
     if (!rfTk) {
-      throw new UnauthorizedException('Something wrong with google login!');
+      throw new UnauthorizedException('Authen failed!');
       return;
     }
 
     const existUser = await this.userModel.findOne({ refreshToken: rfTk });
     if (!existUser) {
-      throw new UnauthorizedException('Something wrong with google login!');
+      throw new UnauthorizedException('Authen failed!');
       return;
     }
 

@@ -40,7 +40,7 @@ export class AuthenController {
 
   @Post('profile')
   GetUserProfile(@Req() req: Request) {
-    return this.authenService.getUserInfoFromRfTk(req);
+    return this.authenService.getUserDataFromRfTk(req);
   }
 
   @Get('google')
@@ -52,5 +52,11 @@ export class AuthenController {
   async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
     await this.authenService.googleLogin(req);
     res.redirect(`${process.env.REACT_APP_ORIGIN}/authentication/redirect`);
+  }
+
+  @Get('logout')
+  async logout(@Req() req: Request, @Res() res: Response) {
+    res.clearCookie('refreshToken');
+    res.end();
   }
 }
