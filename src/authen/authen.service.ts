@@ -49,8 +49,8 @@ export class AuthenService {
     );
   }
 
-  async validateUser(username: string, pass: string): Promise<any> {
-    const user = await this.userModel.findOne({ username }).lean();
+  async validateUser(email: string, pass: string): Promise<any> {
+    const user = await this.userModel.findOne({ email }).lean();
     if (user && user.password === pass) {
       return user;
     }
