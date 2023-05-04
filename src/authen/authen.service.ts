@@ -97,4 +97,25 @@ export class AuthenService {
       this.jwtService,
     );
   }
+
+  async getUserInfoFromRfTk(req: Request) {
+    const rfTk = JSON.parse(req.cookies['refreshToken']) as string;
+    if (!rfTk) {
+      throw new UnauthorizedException('Something wrong with google login!');
+      return;
+    }
+
+    const existUser = await this.userModel.findOne({ refreshToken: rfTk });
+    if (!existUser) {
+      throw new UnauthorizedException('Something wrong with google login!');
+      return;
+    }
+
+    return processPayloadForJwtAndResponse(
+      req,
+      this.userModel,
+      existUser,
+      this.jwtService,
+    );
+  }
 }

@@ -1,5 +1,13 @@
-import { Controller, Post, Body, UseGuards, Get, Req } from '@nestjs/common';
-import { Request } from 'express';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Get,
+  Req,
+  Res,
+} from '@nestjs/common';
+import { Request, Response } from 'express';
 import { AuthenService } from './authen.service';
 import { IRegisterUser } from './dto/register-user.dto';
 import { LocalAuthGuard } from './strategy/local/local-auth.guard';
@@ -10,7 +18,7 @@ import { GoogleOAuthGuard } from './strategy/google/google-auth.guard';
 export class AuthenController {
   constructor(private authenService: AuthenService) {}
 
-  @Post('/register')
+  @Post('register')
   async registerNewUser(
     @Req() req: Request,
     @Body() postRegisterUser: IRegisterUser,
@@ -19,7 +27,7 @@ export class AuthenController {
   }
 
   @UseGuards(LocalAuthGuard)
-  @Post('/login')
+  @Post('login')
   async registerNewUsera(@Req() req: Request) {
     return this.authenService.login(req);
   }
@@ -30,13 +38,19 @@ export class AuthenController {
     return req.user;
   }
 
-  @Get('/google')
+  @Post('profile')
+  GetUserProfile(@Req() req: Request) {
+    return this.authenService.getUserInfoFromRfTk(req);
+  }
+
+  @Get('google')
   @UseGuards(GoogleOAuthGuard)
   async googleAuth() {}
 
   @Get('google-redirect')
   @UseGuards(GoogleOAuthGuard)
-  googleAuthRedirect(@Req() req: Request) {
-    return this.authenService.googleLogin(req);
+  async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
+    await this.authenService.googleLogin(req);
+    res.redirect(`${process.env.REACT_APP_ORIGIN}/authentication/redirect`);
   }
 }

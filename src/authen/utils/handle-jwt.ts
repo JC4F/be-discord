@@ -34,7 +34,7 @@ export const processPayloadForJwtAndResponse = async (
 
   await userModel.findOneAndUpdate({ _id: payload._id }, { refreshToken });
 
-  req.res.cookie('refreshToken', refreshToken, {
+  req.res.cookie('refreshToken', JSON.stringify(refreshToken), {
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000,
   });
