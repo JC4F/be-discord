@@ -29,7 +29,7 @@ export class AuthenController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async registerNewUsera(@Req() req: Request) {
-    return this.authenService.login(req);
+    return await this.authenService.login(req);
   }
 
   @UseGuards(JwtAuthGuard)

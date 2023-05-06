@@ -6,6 +6,8 @@ import { AuthenModule } from './authen/authen.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { configValidationSchema } from './config.schema';
 import { MongooseModule } from '@nestjs/mongoose';
+import { UserInfoModule } from './user-info/user-info.module';
+import { DbSchemaModule } from './db-schema/db-schema.module';
 
 @Module({
   imports: [
@@ -21,6 +23,8 @@ import { MongooseModule } from '@nestjs/mongoose';
       inject: [ConfigService],
     }),
     AuthenModule,
+    UserInfoModule,
+    DbSchemaModule,
   ],
   controllers: [AppController],
   providers: [AppService],

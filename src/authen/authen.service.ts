@@ -4,18 +4,23 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { LoginType, User, UserDocument } from './schemas/user.schema';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { IRegisterUser } from './dto/register-user.dto';
 import { JwtService } from '@nestjs/jwt';
-import { processPayloadForJwtAndResponse } from './utils';
+import {
+  processPayloadForJwtAndResponse,
+  saveAndReturnUserInfo,
+} from './utils';
 import { IUserFromEmailStrategy } from './strategy/google/google.strategy';
+import { LoginType, User } from 'src/db-schema/user.schema';
+import { UserInfo, UserInfoDocument } from 'src/db-schema/user-info.schema';
 
 @Injectable()
 export class AuthenService {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(UserInfo.name) private userInfoModel: Model<UserInfo>,
     private jwtService: JwtService,
   ) {}
 
@@ -33,64 +38,82 @@ export class AuthenService {
       return;
     }
 
-    const newUser = new this.userModel({
+    const newUser = await this.userModel.create({
       email: user.email,
       username: user.username,
       password: user.password,
       isReceiveEmail: user.isReceiveEmail,
     });
 
-    const resultUser: UserDocument = await newUser.save();
-    return processPayloadForJwtAndResponse(
+    const userInfoData = await saveAndReturnUserInfo(
+      newUser,
+      this.userInfoModel,
+    );
+
+    return await processPayloadForJwtAndResponse(
       req,
       this.userModel,
-      resultUser,
+      userInfoData,
       this.jwtService,
     );
   }
 
   async validateUser(email: string, pass: string): Promise<any> {
-    const user = await this.userModel.findOne({ email }).lean();
+    const user = await this.userModel.findOne({ email: email }).lean();
+
     if (user && user.password === pass) {
-      return user;
+      return await this.userInfoModel
+        .findOne({ user: user._id })
+        .populate('user')
+        .lean();
     }
+
     return null;
   }
 
-  login(req: Request) {
-    return processPayloadForJwtAndResponse(
+  async login(req: Request) {
+    return await processPayloadForJwtAndResponse(
       req,
       this.userModel,
-      req.user as UserDocument,
+      req.user as UserInfoDocument,
       this.jwtService,
     );
   }
 
   async googleLogin(req: Request) {
-    const user = req.user as IUserFromEmailStrategy;
-    if (!user) {
+    const userFromGoogle = req.user as IUserFromEmailStrategy;
+    if (!userFromGoogle) {
       throw new UnauthorizedException('Authen failed!');
       return;
     }
+    const user = await this.userModel
+      .findOne({ email: userFromGoogle.email })
+      .lean();
 
-    const existUser = await this.userModel.findOne({ email: user.email });
-
-    if (!existUser) {
-      const newUser = new this.userModel({
-        email: user.email,
+    if (!user) {
+      const newUser = await this.userModel.create({
+        email: userFromGoogle.email,
         loginType: LoginType.GOOGLE,
       });
 
-      const resultUser: UserDocument = await newUser.save();
-      return processPayloadForJwtAndResponse(
+      const userInfoData = await saveAndReturnUserInfo(
+        newUser,
+        this.userInfoModel,
+      );
+
+      return await processPayloadForJwtAndResponse(
         req,
         this.userModel,
-        resultUser,
+        userInfoData,
         this.jwtService,
       );
     }
 
-    return processPayloadForJwtAndResponse(
+    const existUser = await this.userInfoModel
+      .findOne({ user: user._id })
+      .populate('user');
+
+    return await processPayloadForJwtAndResponse(
       req,
       this.userModel,
       existUser,
@@ -105,13 +128,18 @@ export class AuthenService {
       return;
     }
 
-    const existUser = await this.userModel.findOne({ refreshToken: rfTk });
-    if (!existUser) {
+    const user = await this.userModel.findOne({ refreshToken: rfTk }).lean();
+
+    if (!user) {
       throw new UnauthorizedException('Authen failed!');
       return;
     }
 
-    return processPayloadForJwtAndResponse(
+    const existUser = await this.userInfoModel
+      .findOne({ user: user._id })
+      .populate('user');
+
+    return await processPayloadForJwtAndResponse(
       req,
       this.userModel,
       existUser,
