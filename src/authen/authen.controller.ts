@@ -51,7 +51,7 @@ export class AuthenController {
   @UseGuards(GoogleOAuthGuard)
   async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
     await this.authenService.googleLogin(req);
-    res.redirect(`${process.env.REACT_APP_ORIGIN}/authentication/redirect`);
+    res.redirect(`${process.env.REACT_APP_ORIGIN}/authen-redirect`);
   }
 
   @Get('logout')
